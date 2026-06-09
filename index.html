@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>מתי עובדים מהבית?</title>
+    <title>מצב נוכחות צוות</title>
     <style>
         :root {
-            --primary-color: #2d5a27;
-            --primary-hover: #1e3d1a;
-            --bg-color: #f1f5f9;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
+            
+            /* מצבי כפתורים */
+            --office-bg: #f1f5f9;
+            --office-text: #475569;
+            --home-bg: #2563eb;
+            --home-text: #ffffff;
         }
 
         body {
@@ -20,162 +26,156 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 30px 15px;
+            padding: 25px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         h1 {
-            color: var(--primary-color);
-            margin-bottom: 6px;
-            font-size: 2rem;
+            color: #1e293b;
+            margin-bottom: 4px;
+            font-size: 1.8rem;
             font-weight: 700;
         }
 
         .subtitle {
             color: var(--text-muted);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             font-size: 0.95rem;
             text-align: center;
         }
 
-        /* גריד דינמי לכרטיסיות */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+            gap: 16px;
             width: 100%;
             max-width: 1000px;
         }
 
-        /* עיצוב כרטיסיית עובד */
         .user-card {
             background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .user-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            gap: 12px;
         }
 
         .user-name {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--text-main);
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 8px;
         }
 
-        /* קבוצת כפתורי הימים */
-        .days-group {
+        .days-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+            justify-content: space-between;
+            gap: 6px;
         }
 
-        /* כפתור יום מוסתר (הסוואת הצ'קבוקס הדיפולטיבי) */
+        .day-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .day-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
         .day-label {
             cursor: pointer;
-            flex: 1;
-            min-width: 65px;
-            text-align: center;
+            width: 100%;
         }
 
         .day-label input {
-            display: none; /* מחביא את הריבוע המקורי */
+            display: none;
         }
 
-        /* עיצוב הכפתור הויזואלי */
-        .day-pill {
-            display: block;
-            padding: 8px 10px;
-            background-color: #f8fafc;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            border-radius: 10px;
+        /* כפתור הסטטוס */
+        .status-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: var(--office-bg);
+            color: var(--office-text);
+            border-radius: 6px;
             font-size: 0.85rem;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             user-select: none;
         }
 
-        /* מה קורה כשהצ'קבוקס מסומן (האינטראקציה) */
-        .day-label input:checked + .day-pill {
-            background-color: #e6f4ea;
-            border-color: #a3cfbb;
-            color: var(--primary-color);
+        /* ברירת מחדל - משרד */
+        .status-btn::before {
+            content: "משרד";
+        }
+
+        /* כשהצ'קבוקס מופעל - הופך לבית */
+        .day-label input:checked + .status-btn {
+            background-color: var(--home-bg);
+            color: var(--home-text);
             font-weight: 600;
-            box-shadow: 0 2px 4px rgba(45, 90, 39, 0.1);
         }
 
-        /* שינוי קטן במעבר עכבר למחשבים */
-        .day-label:hover .day-pill {
-            border-color: #cbd5e1;
-            background-color: #f1f5f9;
-        }
-        .day-label input:checked:hover + .day-pill {
-            background-color: #d1ebd9;
+        .day-label input:checked + .status-btn::before {
+            content: "בית";
         }
 
-        /* כפתור שמירה צף בתחתית המסך למובייל או קבוע */
-        .save-btn-container {
-            margin-top: 40px;
+        /* כפתור שמירה צף */
+        .save-container {
+            margin-top: 35px;
             position: sticky;
-            bottom: 20px;
+            bottom: 15px;
             z-index: 10;
         }
 
         .save-btn {
-            background-color: var(--primary-color);
+            background-color: #1e293b;
             color: white;
             border: none;
-            padding: 16px 50px;
-            font-size: 16px;
+            padding: 14px 50px;
+            font-size: 15px;
             font-weight: 600;
-            border-radius: 30px; /* כפתור קפסולה צף מודרני */
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 10px 15px -3px rgba(45, 90, 39, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transition: all 0.2s ease;
         }
 
         .save-btn:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(45, 90, 39, 0.4);
+            background-color: #0f172a;
         }
 
         .save-btn:disabled {
             background-color: #94a3b8;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
 
-        /* אנימציית טעינה */
+        /* טעינה */
         .loading-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 60px;
+            margin: 50px;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-color);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
@@ -186,17 +186,16 @@
 </head>
 <body>
 
-    <h1>🏡 מתי עובדים מהבית?</h1>
-    <div class="subtitle">לחצו על הימים שבהם אתם בבית ושמרו</div>
+    <h1>עדכון מיקום צוות</h1>
+    <div class="subtitle">קליק על היום כדי לשנות בין משרד לבית, ובסיום לחצו שמירה</div>
 
     <div id="loading" class="loading-container">
         <div class="spinner"></div>
-        <div style="color: var(--text-muted); font-weight: 500;">טוען את חברי הצוות...</div>
     </div>
 
     <div class="grid-container" id="cards-container" style="display: none"></div>
 
-    <div class="save-btn-container">
+    <div class="save-container">
         <button class="save-btn" id="save-btn" style="display: none" onclick="saveData()">
             שמור שינויים
         </button>
@@ -204,7 +203,7 @@
 
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbx71dQBWIJyZ238V2TMIRYCAwjqFMQTCvl8iwIpr0--4w4pi8ibYrlTSadugkf7fKvC/exec";
-        const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
+        const daysNames = ["ראשון", "שני, "שלישי, "רביעי", "חמישי];
 
         async function loadCards() {
             try {
@@ -214,7 +213,6 @@
                 container.innerHTML = "";
 
                 data.forEach((user) => {
-                    // יצירת כרטיסייה לכל עובד
                     const card = document.createElement("div");
                     card.className = "user-card";
 
@@ -223,11 +221,18 @@
                     nameDiv.textContent = user.name;
                     card.appendChild(nameDiv);
 
-                    const daysGroup = document.createElement("div");
-                    daysGroup.className = "days-group";
+                    const daysContainer = document.createElement("div");
+                    daysContainer.className = "days-container";
 
-                    // יצירת 5 כפתורים פנימיים לכל יום
                     for (let i = 0; i < 5; i++) {
+                        const dayWrapper = document.createElement("div");
+                        dayWrapper.className = "day-wrapper";
+
+                        const dayName = document.createElement("div");
+                        dayName.className = "day-name";
+                        dayName.textContent = daysNames[i];
+                        dayWrapper.appendChild(dayName);
+
                         const label = document.createElement("label");
                         label.className = "day-label";
 
@@ -237,25 +242,24 @@
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
 
-                        const pill = document.createElement("span");
-                        pill.className = "day-pill";
-                        pill.textContent = daysNames[i];
-
+                        const statusBtn = document.createElement("div");
+                        statusBtn.className = "status-btn";
+                        
                         label.appendChild(checkbox);
-                        label.appendChild(pill);
-                        daysGroup.appendChild(label);
+                        label.appendChild(statusBtn);
+                        dayWrapper.appendChild(label);
+                        daysContainer.appendChild(dayWrapper);
                     }
 
-                    card.appendChild(daysGroup);
+                    card.appendChild(daysContainer);
                     container.appendChild(card);
                 });
 
-                document.getElementById("loading").style.style.display = "none"; // תיקון שגיאת כתיב קטנה שהייתה בקוד הקודם
                 document.getElementById("loading").style.display = "none";
                 container.style.display = "grid";
                 document.getElementById("save-btn").style.display = "block";
             } catch (e) {
-                document.getElementById("loading").innerHTML = "<div style='color:#ef4444;'>שגיאה בטעינת הנתונים.</div>";
+                document.getElementById("loading").innerHTML = "<div style='color:#ef4444; font-weight:600;'>שגיאה בטעינת הנתונים</div>";
                 console.error(e);
             }
         }
@@ -283,7 +287,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
-                alert("השינויים נשמרו בהצלחה!");
+                alert("העדכון נשמר בהצלחה!");
             } catch (e) {
                 alert("שגיאה בשמירת הנתונים");
                 console.error(e);
