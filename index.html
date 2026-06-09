@@ -107,6 +107,7 @@
             align-items: center;
         }
 
+        /* עיצוב משודרג לקוביות השבועיות כולל ה-Tooltip המותאם */
         .weekly-summary-day {
             flex: 1;
             text-align: center;
@@ -115,11 +116,51 @@
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             position: relative;
-            cursor: help;
+            cursor: pointer;
         }
 
         .weekly-summary-day:hover {
             background: #e2e8f0;
+        }
+
+        /* הבלון הקופץ בהובר */
+        .weekly-summary-day .tooltip-text {
+            visibility: hidden;
+            width: 140px;
+            background-color: #0f172a;
+            color: #fff;
+            text-align: right;
+            border-radius: 6px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 20;
+            bottom: 125%; /* מציג מעל הקובייה */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 0.8rem;
+            line-height: 1.4;
+            white-space: pre-line; /* שומר על ירידת שורה של השמות */
+        }
+
+        /* חץ קטן מתחת לבלון */
+        .weekly-summary-day .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #0f172a transparent transparent transparent;
+        }
+
+        /* הפעלת ההובר מיד ללא דיליי */
+        .weekly-summary-day:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
 
         .weekly-day-title {
@@ -279,11 +320,31 @@
         <div class="summary-card">
             <h3>כמה מגיעים למשרד השבוע?</h3>
             <div class="weekly-summary-grid">
-                <div class="weekly-summary-day" id="day-card-0"><div class="weekly-day-title">א'</div><div class="weekly-day-count" id="count-0">0</div></div>
-                <div class="weekly-summary-day" id="day-card-1"><div class="weekly-day-title">ב'</div><div class="weekly-day-count" id="count-1">0</div></div>
-                <div class="weekly-summary-day" id="day-card-2"><div class="weekly-day-title">ג'</div><div class="weekly-day-count" id="count-2">0</div></div>
-                <div class="weekly-summary-day" id="day-card-3"><div class="weekly-day-title">ד'</div><div class="weekly-day-count" id="count-3">0</div></div>
-                <div class="weekly-summary-day" id="day-card-4"><div class="weekly-day-title">ה'</div><div class="weekly-day-count" id="count-4">0</div></div>
+                <div class="weekly-summary-day" id="day-card-0">
+                    <div class="weekly-day-title">א'</div>
+                    <div class="weekly-day-count" id="count-0">0</div>
+                    <span class="tooltip-text" id="tooltip-0">כולם מגיעים!</span>
+                </div>
+                <div class="weekly-summary-day" id="day-card-1">
+                    <div class="weekly-day-title">ב'</div>
+                    <div class="weekly-day-count" id="count-1">0</div>
+                    <span class="tooltip-text" id="tooltip-1">כולם מגיעים!</span>
+                </div>
+                <div class="weekly-summary-day" id="day-card-2">
+                    <div class="weekly-day-title">ג'</div>
+                    <div class="weekly-day-count" id="count-2">0</div>
+                    <span class="tooltip-text" id="tooltip-2">כולם מגיעים!</span>
+                </div>
+                <div class="weekly-summary-day" id="day-card-3">
+                    <div class="weekly-day-title">ד'</div>
+                    <div class="weekly-day-count" id="count-3">0</div>
+                    <span class="tooltip-text" id="tooltip-3">כולם מגיעים!</span>
+                </div>
+                <div class="weekly-summary-day" id="day-card-4">
+                    <div class="weekly-day-title">ה'</div>
+                    <div class="weekly-day-count" id="count-4">0</div>
+                    <span class="tooltip-text" id="tooltip-4">כולם מגיעים!</span>
+                </div>
             </div>
         </div>
     </div>
@@ -327,11 +388,16 @@
                 }
             });
 
-            // 1. עדכון מונים והובר בסיכום השבועי
+            // 1. עדכון מונים ובלון ההובר המותאם אישית (Tooltip CSS)
             for (let i = 0; i < 5; i++) {
                 document.getElementById(`count-${i}`).textContent = weeklyOfficeCounts[i];
-                const dayCard = document.getElementById(`day-card-${i}`);
-                dayCard.title = absentWorkersByDay[i].length > 0 ? "לא יגיעו:\n" + absentWorkersByDay[i].join("\n") : "כולם מגיעים!";
+                const tooltipEl = document.getElementById(`tooltip-${i}`);
+                
+                if (absentWorkersByDay[i].length > 0) {
+                    tooltipEl.innerHTML = "<strong>לא יגיעו:</strong>\n" + absentWorkersByDay[i].join("\n");
+                } else {
+                    tooltipEl.textContent = "כולם מגיעים!";
+                }
             }
 
             // 2. חישוב היום הנוכחי
