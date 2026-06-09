@@ -83,12 +83,14 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
+            min-width: 0; /* מונע קריסה של הכפתורים במובייל */
         }
 
         .day-name {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: #94a3b8;
+            white-space: nowrap;
         }
 
         .day-label {
@@ -105,14 +107,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 10px 0;
+            padding: 10px 2px;
             background-color: var(--office-bg);
             color: var(--office-text);
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
             transition: all 0.15s ease;
             user-select: none;
+            white-space: nowrap;
         }
 
         /* ברירת מחדל - משרד */
@@ -203,7 +206,7 @@
 
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbx71dQBWIJyZ238V2TMIRYCAwjqFMQTCvl8iwIpr0--4w4pi8ibYrlTSadugkf7fKvC/exec";
-        const daysNames = ["ראשון", "שני, "שלישי, "רביעי", "חמישי];
+        const daysNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
 
         async function loadCards() {
             try {
