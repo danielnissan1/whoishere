@@ -107,7 +107,7 @@
             align-items: center;
         }
 
-        /* עיצוב משודרג לקוביות השבועיות כולל ה-Tooltip המותאם */
+        /* קוביות הסיכום השבועי */
         .weekly-summary-day {
             flex: 1;
             text-align: center;
@@ -123,7 +123,7 @@
             background: #e2e8f0;
         }
 
-        /* הבלון הקופץ בהובר */
+        /* הטולטיפ שקופץ בהובר */
         .weekly-summary-day .tooltip-text {
             visibility: hidden;
             width: 140px;
@@ -134,7 +134,7 @@
             padding: 8px 12px;
             position: absolute;
             z-index: 20;
-            bottom: 125%; /* מציג מעל הקובייה */
+            bottom: 125%;
             left: 50%;
             transform: translateX(-50%);
             opacity: 0;
@@ -142,10 +142,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             font-size: 0.8rem;
             line-height: 1.4;
-            white-space: pre-line; /* שומר על ירידת שורה של השמות */
+            white-space: pre-line;
         }
 
-        /* חץ קטן מתחת לבלון */
         .weekly-summary-day .tooltip-text::after {
             content: "";
             position: absolute;
@@ -157,7 +156,6 @@
             border-color: #0f172a transparent transparent transparent;
         }
 
-        /* הפעלת ההובר מיד ללא דיליי */
         .weekly-summary-day:hover .tooltip-text {
             visibility: visible;
             opacity: 1;
@@ -366,6 +364,49 @@
         const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
         let globalData = [];
 
+        // פונקציית הליבה שמחשבת את המצב ומאכפת את החוקים החדשים
+        function handleCheckboxChange(e) {
+            const cb = e.target;
+            const targetUser = cb.dataset.user;
+            const targetDay = parseInt(cb.dataset.day);
+
+            // אם המשתמש מנסה לסמן "לא פה" (כלומר checked = true)
+            if (cb.checked) {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                
+                let userAbsentCount = 0;
+                let dayAbsentCount = 0;
+
+                checkboxes.forEach(otherCb => {
+                    // סופרים כמה ימים המשתמש הנוכחי כבר סימן כ"לא פה" (לא כולל הלחיצה הנוכחית)
+                    if (otherCb !== cb && otherCb.dataset.user === targetUser && otherCb.checked) {
+                        userAbsentCount++;
+                    }
+                    // סופרים כמה אנשים כבר לא פה ביום הספציפי הזה
+                    if (otherCb !== cb && parseInt(otherCb.dataset.day) === targetDay && otherCb.checked) {
+                        dayAbsentCount++;
+                    }
+                });
+
+                // חוק 1: מקסימום יומיים בשבוע לעובד
+                if (userAbsentCount >= 2) {
+                    alert(`לא ניתן לסמן: ${targetUser} כבר ניצל את מקסימום יומיים "לא פה" לשבוע זה.`);
+                    cb.checked = false;
+                    return;
+                }
+
+                // חוק 2: מקסימום 5 אנשים ביום מהבית (כלומר מקסימום 5 מסומנים כ"לא פה")
+                if (dayAbsentCount >= 5) {
+                    alert(`לא ניתן לסמן: ביום ${daysNames[targetDay]} כבר רשומים 5 אנשים כ"לא פה" (הגעתם למכסה הנהלתית).`);
+                    cb.checked = false;
+                    return;
+                }
+            }
+
+            // אם הכל תקין, מעדכנים את הדאשבורד בלייב
+            updateLiveSummaries();
+        }
+
         function updateLiveSummaries() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const weeklyOfficeCounts = [0, 0, 0, 0, 0];
@@ -388,7 +429,7 @@
                 }
             });
 
-            // 1. עדכון מונים ובלון ההובר המותאם אישית (Tooltip CSS)
+            // 1. עדכון מונים וטולטיפים
             for (let i = 0; i < 5; i++) {
                 document.getElementById(`count-${i}`).textContent = weeklyOfficeCounts[i];
                 const tooltipEl = document.getElementById(`tooltip-${i}`);
@@ -406,7 +447,7 @@
 
             document.getElementById("today-title").textContent = `מצב נוכחות היום (יום ${daysNames[currentDayIndex]})`;
 
-            // 3. עדכון רשימת הנוכחים (במשרד)
+            // 3. עדכון רשימת הנוכחים במשרד
             const todayOfficeContainer = document.getElementById("today-office-workers");
             todayOfficeContainer.innerHTML = "";
             const workersToday = officeWorkersByDay[currentDayIndex];
@@ -421,7 +462,7 @@
                 });
             }
 
-            // 4. עדכון רשימת הניעדרים (לא פה)
+            // 4. עדכון רשימת הלא פה
             const todayAbsentContainer = document.getElementById("today-absent-workers");
             todayAbsentContainer.innerHTML = "";
             const absentToday = absentWorkersByDay[currentDayIndex];
@@ -466,7 +507,8 @@
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
 
-                        checkbox.addEventListener('change', updateLiveSummaries);
+                        // העברנו את הלוגיקה לפונקציה החדשה שמבצעת את הוולידציות
+                        checkbox.addEventListener('change', handleCheckboxChange);
 
                         const square = document.createElement("div");
                         square.className = "binary-square";
@@ -525,9 +567,9 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
-                alert("נשמר!");
+                alert("נשמר בהצלחה!");
             } catch (e) {
-                alert("שגיאה");
+                alert("שגיאה בשמירת הנתונים");
                 console.error(e);
             } finally {
                 btn.textContent = "שמור שינויים";
