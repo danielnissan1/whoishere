@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מתי עובדים מהבית?</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f7f6;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      h1 {
+        color: #2d5a27;
+        margin-bottom: 20px;
+      }
+      .table-container {
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        max-width: 800px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: right;
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      th {
+        background-color: #2d5a27;
+        color: white;
+        font-weight: 600;
+      }
+      tr:hover {
+        background-color: #f1f8f5;
+      }
+      .checkbox-cell {
+        text-align: center;
+      }
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #2d5a27;
+      }
+      .save-btn {
+        margin-top: 20px;
+        background-color: #2d5a27;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .save-btn:hover {
+        background-color: #1e3d1a;
+      }
+      .loading {
+        font-size: 18px;
+        color: #666;
+        margin: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🏡 מתי עובדים מהבית?</h1>
+    <div id="loading" class="loading">טוען נתונים מהגליון...</div>
+
+    <div class="table-container" id="table-wrapper" style="display: none">
+      <table>
+        <thead>
+          <tr>
+            <th>מי?</th>
+            <th class="checkbox-cell">ראשון</th>
+            <th class="checkbox-cell">שני</th>
+            <th class="checkbox-cell">שלישי</th>
+            <th class="checkbox-cell">רביעי</th>
+            <th class="checkbox-cell">חמישי</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <button
+      class="save-btn"
+      id="save-btn"
+      style="display: none"
+      onclick="saveData()"
+    >
+      שמור שינויים
+    </button>
+
+    <script>
+      // הדבק כאן את הקישור שקיבלת מ-Google Apps Script
+      const scriptUrl =
+        "https://script.google.com/macros/s/AKfycbx71dQBWIJyZ238V2TMIRYCAwjqFMQTCvl8iwIpr0--4w4pi8ibYrlTSadugkf7fKvC/exec";
+
+      async function loadTable() {
+        try {
+          const response = await fetch(scriptUrl);
+          const data = await response.json();
+          const tbody = document.getElementById("table-body");
+          tbody.innerHTML = "";
+
+          data.forEach((user) => {
+            const tr = document.createElement("tr");
+            const nameTd = document.createElement("td");
+            nameTd.textContent = user.name;
+            tr.appendChild(nameTd);
+
+            for (let i = 0; i < 5; i++) {
+              const td = document.createElement("td");
+              td.className = "checkbox-cell";
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.dataset.user = user.name;
+              checkbox.dataset.day = i;
+              checkbox.checked =
+                user.days[i] === true || user.days[i] === "TRUE";
+              td.appendChild(checkbox);
+              tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+          });
+
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("table-wrapper").style.display = "block";
+          document.getElementById("save-btn").style.display = "block";
+        } catch (e) {
+          document.getElementById("loading").textContent =
+            "שגיאה בטעינת הנתונים.";
+          console.error(e);
+        }
+      }
+
+      async function saveData() {
+        const btn = document.getElementById("save-btn");
+        btn.textContent = "שומר...";
+        btn.disabled = true;
+
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const payload = {};
+
+        checkboxes.forEach((cb) => {
+          const user = cb.dataset.user;
+          const dayIndex = parseInt(cb.dataset.day);
+          if (!payload[user])
+            payload[user] = [false, false, false, false, false];
+          payload[user][dayIndex] = cb.checked;
+        });
+
+        try {
+          await fetch(scriptUrl, {
+            method: "POST",
+            mode: "no-cors", // פותר בעיות CORS מול גוגל סקריפט
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          alert("השינויים נשמרו בהצלחה בגליון!");
+        } catch (e) {
+          alert("שגיאה בשמירת הנתונים");
+          console.error(e);
+        } finally {
+          btn.textContent = "שמור שינויים";
+          btn.disabled = false;
+        }
+      }
+
+      loadTable();
+    </script>
+  </body>
+</html>
