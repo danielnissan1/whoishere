@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>מי לא פה?</title>
+    <title>מתי עובדים מהבית?</title>
     <style>
         :root {
             --primary-color: #2d5a27;
             --primary-hover: #1e3d1a;
-            --bg-color: #f8fafc;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
             --border-color: #e2e8f0;
-            --row-hover: #f1f5f9;
-            --active-cell: #f0fdf4;
         }
 
         body {
@@ -21,7 +20,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 40px 20px;
+            padding: 30px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -29,134 +28,129 @@
 
         h1 {
             color: var(--primary-color);
-            margin-bottom: 8px;
-            font-size: 2.2rem;
+            margin-bottom: 6px;
+            font-size: 2rem;
             font-weight: 700;
         }
 
         .subtitle {
-            color: #64748b;
-            margin-bottom: 32px;
-            font-size: 1rem;
-        }
-
-        .table-container {
-            background-color: var(--card-bg);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            border-radius: 16px;
-            overflow: hidden;
-            width: 100%;
-            max-width: 850px;
-            border: 1px solid var(--border-color);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: right;
-        }
-
-        th, td {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease;
-        }
-
-        th {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: 600;
-            font-size: 1.05rem;
-            letter-spacing: 0.5px;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background-color: var(--row-hover);
-        }
-
-        tr td.checked-bg {
-            background-color: var(--active-cell);
-        }
-
-        .checkbox-cell {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
             text-align: center;
-            vertical-align: middle;
         }
 
-        /* עיצוב מודרני לטוגל (Switch) */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
+        /* גריד דינמי לכרטיסיות */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        /* עיצוב כרטיסיית עובד */
+        .user-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .slider {
-            position: absolute;
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        .user-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-main);
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+        /* קבוצת כפתורי הימים */
+        .days-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* כפתור יום מוסתר (הסוואת הצ'קבוקס הדיפולטיבי) */
+        .day-label {
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: .3s ease;
-            border-radius: 24px;
+            flex: 1;
+            min-width: 65px;
+            text-align: center;
         }
 
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .3s ease;
-            border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        .day-label input {
+            display: none; /* מחביא את הריבוע המקורי */
         }
 
-        input:checked + .slider {
-            background-color: var(--primary-color);
+        /* עיצוב הכפתור הויזואלי */
+        .day-pill {
+            display: block;
+            padding: 8px 10px;
+            background-color: #f8fafc;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            user-select: none;
         }
 
-        input:checked + .slider:before {
-            transform: translateX(20px);
+        /* מה קורה כשהצ'קבוקס מסומן (האינטראקציה) */
+        .day-label input:checked + .day-pill {
+            background-color: #e6f4ea;
+            border-color: #a3cfbb;
+            color: var(--primary-color);
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(45, 90, 39, 0.1);
         }
 
-        /* כפתור שמירה מעוצב */
+        /* שינוי קטן במעבר עכבר למחשבים */
+        .day-label:hover .day-pill {
+            border-color: #cbd5e1;
+            background-color: #f1f5f9;
+        }
+        .day-label input:checked:hover + .day-pill {
+            background-color: #d1ebd9;
+        }
+
+        /* כפתור שמירה צף בתחתית המסך למובייל או קבוע */
+        .save-btn-container {
+            margin-top: 40px;
+            position: sticky;
+            bottom: 20px;
+            z-index: 10;
+        }
+
         .save-btn {
-            margin-top: 28px;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 14px 40px;
+            padding: 16px 50px;
             font-size: 16px;
             font-weight: 600;
-            border-radius: 12px;
+            border-radius: 30px; /* כפתור קפסולה צף מודרני */
             cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(45, 90, 39, 0.2);
+            box-shadow: 0 10px 15px -3px rgba(45, 90, 39, 0.3);
             transition: all 0.2s ease;
         }
 
         .save-btn:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(45, 90, 39, 0.25);
-        }
-
-        .save-btn:active {
-            transform: translateY(1px);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(45, 90, 39, 0.4);
         }
 
         .save-btn:disabled {
@@ -166,12 +160,12 @@
             box-shadow: none;
         }
 
-        /* ספינר טעינה חצי שקוף ומודרני */
+        /* אנימציית טעינה */
         .loading-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin: 40px;
+            margin: 60px;
         }
 
         .spinner {
@@ -181,130 +175,94 @@
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .loading-text {
-            font-size: 16px;
-            color: #64748b;
-            font-weight: 500;
-        }
     </style>
 </head>
 <body>
 
     <h1>🏡 מתי עובדים מהבית?</h1>
-    <div class="subtitle">סמנו את הימים שלכם ולחצו על שמירה</div>
+    <div class="subtitle">לחצו על הימים שבהם אתם בבית ושמרו</div>
 
     <div id="loading" class="loading-container">
         <div class="spinner"></div>
-        <div class="loading-text">טוענים נתונים מהגליון...</div>
+        <div style="color: var(--text-muted); font-weight: 500;">טוען את חברי הצוות...</div>
     </div>
 
-    <div class="table-container" id="table-wrapper" style="display: none">
-        <table>
-            <thead>
-                <tr>
-                    <th>מי?</th>
-                    <th class="checkbox-cell">ראשון</th>
-                    <th class="checkbox-cell">שני</th>
-                    <th class="checkbox-cell">שלישי</th>
-                    <th class="checkbox-cell">רביעי</th>
-                    <th class="checkbox-cell">חמישי</th>
-                </tr>
-            </thead>
-            <tbody id="table-body"></tbody>
-        </table>
-    </div>
+    <div class="grid-container" id="cards-container" style="display: none"></div>
 
-    <button
-        class="save-btn"
-        id="save-btn"
-        style="display: none"
-        onclick="saveData()"
-    >
-        שמור שינויים
-    </button>
+    <div class="save-btn-container">
+        <button class="save-btn" id="save-btn" style="display: none" onclick="saveData()">
+            שמור שינויים
+        </button>
+    </div>
 
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbx71dQBWIJyZ238V2TMIRYCAwjqFMQTCvl8iwIpr0--4w4pi8ibYrlTSadugkf7fKvC/exec";
+        const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
 
-        // פונקציה לעדכון רקע התא לפי מצב הטוגל
-        function updateCellBackground(checkbox) {
-            const td = checkbox.closest('td');
-            if (checkbox.checked) {
-                td.classList.add('checked-bg');
-            } else {
-                td.classList.remove('checked-bg');
-            }
-        }
-
-        async function loadTable() {
+        async function loadCards() {
             try {
                 const response = await fetch(scriptUrl);
                 const data = await response.json();
-                const tbody = document.getElementById("table-body");
-                tbody.innerHTML = "";
+                const container = document.getElementById("cards-container");
+                container.innerHTML = "";
 
                 data.forEach((user) => {
-                    const tr = document.createElement("tr");
-                    const nameTd = document.createElement("td");
-                    nameTd.style.fontWeight = "500";
-                    nameTd.textContent = user.name;
-                    tr.appendChild(nameTd);
+                    // יצירת כרטיסייה לכל עובד
+                    const card = document.createElement("div");
+                    card.className = "user-card";
 
+                    const nameDiv = document.createElement("div");
+                    nameDiv.className = "user-name";
+                    nameDiv.textContent = user.name;
+                    card.appendChild(nameDiv);
+
+                    const daysGroup = document.createElement("div");
+                    daysGroup.className = "days-group";
+
+                    // יצירת 5 כפתורים פנימיים לכל יום
                     for (let i = 0; i < 5; i++) {
-                        const td = document.createElement("td");
-                        td.className = "checkbox-cell";
-                        
                         const label = document.createElement("label");
-                        label.className = "switch";
+                        label.className = "day-label";
 
                         const checkbox = document.createElement("input");
                         checkbox.type = "checkbox";
                         checkbox.dataset.user = user.name;
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
-                        
-                        const slider = document.createElement("span");
-                        slider.className = "slider";
 
-                        // האזנה לשינוי כדי לצבוע את הרקע בלייב
-                        checkbox.addEventListener('change', function() {
-                            updateCellBackground(this);
-                        });
+                        const pill = document.createElement("span");
+                        pill.className = "day-pill";
+                        pill.textContent = daysNames[i];
 
                         label.appendChild(checkbox);
-                        label.appendChild(slider);
-                        td.appendChild(label);
-                        tr.appendChild(td);
-
-                        // הרצה ראשונית לצביעת תאים מסומנים בטעינה
-                        if (checkbox.checked) {
-                            td.classList.add('checked-bg');
-                        }
+                        label.appendChild(pill);
+                        daysGroup.appendChild(label);
                     }
-                    tbody.appendChild(tr);
+
+                    card.appendChild(daysGroup);
+                    container.appendChild(card);
                 });
 
+                document.getElementById("loading").style.style.display = "none"; // תיקון שגיאת כתיב קטנה שהייתה בקוד הקודם
                 document.getElementById("loading").style.display = "none";
-                document.getElementById("table-wrapper").style.display = "block";
+                container.style.display = "grid";
                 document.getElementById("save-btn").style.display = "block";
             } catch (e) {
-                document.querySelector(".loading-text").textContent = "שגיאה בטעינת הנתונים.";
-                document.querySelector(".spinner").style.borderTopColor = "#ef4444";
+                document.getElementById("loading").innerHTML = "<div style='color:#ef4444;'>שגיאה בטעינת הנתונים.</div>";
                 console.error(e);
             }
         }
 
         async function saveData() {
             const btn = document.getElementById("save-btn");
-            btn.textContent = "שומר שינויים...";
+            btn.textContent = "שומר...";
             btn.disabled = true;
 
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -325,7 +283,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
-                alert("השינויים נשמרו בהצלחה בגליון!");
+                alert("השינויים נשמרו בהצלחה!");
             } catch (e) {
                 alert("שגיאה בשמירת הנתונים");
                 console.error(e);
@@ -335,7 +293,7 @@
             }
         }
 
-        loadTable();
+        loadCards();
     </script>
 </body>
 </html>
