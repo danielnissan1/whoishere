@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>דאשבורד נוכחות צוות</title>
+    <title>נוכחות צוות</title>
     <style>
         :root {
             --bg-color: #f1f5f9;
@@ -12,11 +12,11 @@
             --text-muted: #64748b;
             --border-color: #cbd5e1;
             
-            /* מצבים בינאריים נקיים */
-            --office-state-bg: #ffffff;
-            --office-state-text: #0f172a;
-            --home-state-bg: #1e293b;
-            --home-state-text: #ffffff;
+            /* מצבים בינאריים */
+            --office-bg: #ffffff;
+            --office-text: #1e293b;
+            --home-bg: #1e293b;
+            --home-text: #ffffff;
         }
 
         body {
@@ -34,9 +34,10 @@
             font-size: 1.6rem;
             font-weight: 700;
             margin-bottom: 20px;
+            color: #1e293b;
         }
 
-        /* אזור הסיכומים העליון */
+        /* אזור הסיכומים */
         .summary-section {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -62,7 +63,6 @@
             padding-bottom: 6px;
         }
 
-        /* רשימת האנשים במשרד היום */
         .today-list {
             display: flex;
             flex-wrap: wrap;
@@ -77,7 +77,6 @@
             font-weight: 500;
         }
 
-        /* סיכום שבועי מספרי */
         .weekly-summary-grid {
             display: flex;
             justify-content: space-between;
@@ -106,7 +105,7 @@
             color: #2563eb;
         }
 
-        /* גריד הכרטיסיות הראשי */
+        /* גריד הכרטיסיות */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -145,11 +144,11 @@
             display: none;
         }
 
-        /* קוביית המצב הבינארית החדשה */
+        /* קוביית המצב הבינארית */
         .binary-square {
-            height: 45px;
-            background-color: var(--office-state-bg);
-            color: var(--office-state-text);
+            height: 52px;
+            background-color: var(--office-bg);
+            color: var(--office-text);
             border: 2px solid var(--border-color);
             border-radius: 8px;
             display: flex;
@@ -161,18 +160,36 @@
         }
 
         .square-day {
-            font-size: 0.8rem;
+            font-size: 0.95rem;
             font-weight: 700;
+            line-height: 1.2;
         }
 
-        /* מצב "בית" - כשהתיבה מסומנת, הופך לכהה ובולט */
+        /* כיתוב הסטטוס הקטן מתחת לאות */
+        .square-status-text {
+            font-size: 0.65rem;
+            font-weight: 500;
+            margin-top: 2px;
+            opacity: 0.7;
+        }
+
+        /* דיפולט - משרד */
+        .square-status-text::before {
+            content: "משרד";
+        }
+
+        /* כשהתיבה מסומנת -> הופך ל"לא פה" (כהה ובולט) */
         .clickable-label input:checked + .binary-square {
-            background-color: var(--home-state-bg);
-            color: var(--home-state-text);
-            border-color: var(--home-state-bg);
+            background-color: var(--home-bg);
+            color: var(--home-text);
+            border-color: var(--home-bg);
         }
 
-        /* כפתור שמירה קבוע צף בתחתית */
+        .clickable-label input:checked + .binary-square .square-status-text::before {
+            content: "לא פה";
+        }
+
+        /* כפתור שמירה צף */
         .save-container {
             margin-top: 30px;
             position: sticky;
@@ -215,13 +232,12 @@
 </head>
 <body>
 
-    <h1>🌎 דאשבורד נוכחות צוות</h1>
+    <h1>נוכחות צוות</h1>
 
     <div class="summary-section" id="summary-area" style="display: none;">
         <div class="summary-card">
             <h3 id="today-title">מי במשרד היום?</h3>
-            <div class="today-list" id="today-office-workers">
-                </div>
+            <div class="today-list" id="today-office-workers"></div>
         </div>
 
         <div class="summary-card">
@@ -253,13 +269,9 @@
         const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
         let globalData = [];
 
-        // פונקציה שמחשבת ומעדכנת את כל הסטטיסטיקות במסך בזמן אמת
         function updateLiveSummaries() {
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            
-            // אתחול מונים לשבוע (כמה במשרד)
             const weeklyOfficeCounts = [0, 0, 0, 0, 0];
-            // מפת אנשים שנמצאים במשרד בכל יום
             const officeWorkersByDay = [[], [], [], [], []];
 
             checkboxes.forEach(cb => {
@@ -267,7 +279,6 @@
                 const dayIndex = parseInt(cb.dataset.day);
                 
                 if (!cb.checked) { 
-                    // אם הצ'קבוקס לא מסומן -> הבנאדם במשרד
                     weeklyOfficeCounts[dayIndex]++;
                     if (!officeWorkersByDay[dayIndex].includes(user)) {
                         officeWorkersByDay[dayIndex].push(user);
@@ -275,19 +286,15 @@
                 }
             });
 
-            // 1. עדכון המונים של כל השבוע
             for (let i = 0; i < 5; i++) {
                 document.getElementById(`count-${i}`).textContent = weeklyOfficeCounts[i];
             }
 
-            // 2. חישוב היום הנוכחי (0 = ראשון, 4 = חמישי)
             let currentDayIndex = new Date().getDay(); 
-            // אם אנחנו בשישי או שבת, נציג כברירת מחדל את יום ראשון
             if (currentDayIndex > 4 || currentDayIndex < 0) currentDayIndex = 0;
 
             document.getElementById("today-title").textContent = `מי במשרד היום (יום ${daysNames[currentDayIndex]})?`;
 
-            // 3. עדכון רשימת השמות של היום
             const todayContainer = document.getElementById("today-office-workers");
             todayContainer.innerHTML = "";
             const workersToday = officeWorkersByDay[currentDayIndex];
@@ -333,7 +340,6 @@
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
 
-                        // האזנה לשינויים כדי לעדכן את הסטטיסטיקה בלייב
                         checkbox.addEventListener('change', updateLiveSummaries);
 
                         const square = document.createElement("div");
@@ -343,7 +349,11 @@
                         daySpan.className = "square-day";
                         daySpan.textContent = daysNames[i];
                         
+                        const statusSpan = document.createElement("span");
+                        statusSpan.className = "square-status-text";
+                        
                         square.appendChild(daySpan);
+                        square.appendChild(statusSpan);
                         label.appendChild(checkbox);
                         label.appendChild(square);
                         daysRow.appendChild(label);
@@ -358,7 +368,6 @@
                 container.style.display = "grid";
                 document.getElementById("save-btn").style.display = "block";
                 
-                // הרצה ראשונית של הסיכומים עם טעינת הדף
                 updateLiveSummaries();
 
             } catch (e) {
