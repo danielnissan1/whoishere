@@ -53,20 +53,37 @@
             padding: 16px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .summary-card h3 {
-            margin: 0 0 12px 0;
+            margin: 0;
             font-size: 1rem;
             color: var(--text-main);
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 6px;
         }
 
+        .status-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
         .today-list {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
+            min-height: 26px;
+            align-items: center;
         }
 
         .today-tag {
@@ -77,10 +94,17 @@
             font-weight: 500;
         }
 
+        .today-tag.absent {
+            background: #1e293b;
+            color: #ffffff;
+        }
+
         .weekly-summary-grid {
             display: flex;
             justify-content: space-between;
             gap: 8px;
+            height: 100%;
+            align-items: center;
         }
 
         .weekly-summary-day {
@@ -90,6 +114,12 @@
             padding: 8px 4px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
+            position: relative;
+            cursor: help;
+        }
+
+        .weekly-summary-day:hover {
+            background: #e2e8f0;
         }
 
         .weekly-day-title {
@@ -165,7 +195,6 @@
             line-height: 1.2;
         }
 
-        /* כיתוב הסטטוס הקטן מתחת לאות */
         .square-status-text {
             font-size: 0.65rem;
             font-weight: 500;
@@ -173,12 +202,10 @@
             opacity: 0.7;
         }
 
-        /* דיפולט - משרד */
         .square-status-text::before {
             content: "משרד";
         }
 
-        /* כשהתיבה מסומנת -> הופך ל"לא פה" (כהה ובולט) */
         .clickable-label input:checked + .binary-square {
             background-color: var(--home-bg);
             color: var(--home-text);
@@ -236,18 +263,27 @@
 
     <div class="summary-section" id="summary-area" style="display: none;">
         <div class="summary-card">
-            <h3 id="today-title">מי במשרד היום?</h3>
-            <div class="today-list" id="today-office-workers"></div>
+            <h3 id="today-title">מצב נוכחות היום</h3>
+            
+            <div class="status-group">
+                <div class="status-label">במשרד:</div>
+                <div class="today-list" id="today-office-workers"></div>
+            </div>
+            
+            <div class="status-group">
+                <div class="status-label">לא פה:</div>
+                <div class="today-list" id="today-absent-workers"></div>
+            </div>
         </div>
 
         <div class="summary-card">
             <h3>כמה מגיעים למשרד השבוע?</h3>
             <div class="weekly-summary-grid">
-                <div class="weekly-summary-day"><div class="weekly-day-title">א'</div><div class="weekly-day-count" id="count-0">0</div></div>
-                <div class="weekly-summary-day"><div class="weekly-day-title">ב'</div><div class="weekly-day-count" id="count-1">0</div></div>
-                <div class="weekly-summary-day"><div class="weekly-day-title">ג'</div><div class="weekly-day-count" id="count-2">0</div></div>
-                <div class="weekly-summary-day"><div class="weekly-day-title">ד'</div><div class="weekly-day-count" id="count-3">0</div></div>
-                <div class="weekly-summary-day"><div class="weekly-day-title">ה'</div><div class="weekly-day-count" id="count-4">0</div></div>
+                <div class="weekly-summary-day" id="day-card-0"><div class="weekly-day-title">א'</div><div class="weekly-day-count" id="count-0">0</div></div>
+                <div class="weekly-summary-day" id="day-card-1"><div class="weekly-day-title">ב'</div><div class="weekly-day-count" id="count-1">0</div></div>
+                <div class="weekly-summary-day" id="day-card-2"><div class="weekly-day-title">ג'</div><div class="weekly-day-count" id="count-2">0</div></div>
+                <div class="weekly-summary-day" id="day-card-3"><div class="weekly-day-title">ד'</div><div class="weekly-day-count" id="count-3">0</div></div>
+                <div class="weekly-summary-day" id="day-card-4"><div class="weekly-day-title">ה'</div><div class="weekly-day-count" id="count-4">0</div></div>
             </div>
         </div>
     </div>
@@ -273,6 +309,7 @@
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const weeklyOfficeCounts = [0, 0, 0, 0, 0];
             const officeWorkersByDay = [[], [], [], [], []];
+            const absentWorkersByDay = [[], [], [], [], []];
 
             checkboxes.forEach(cb => {
                 const user = cb.dataset.user;
@@ -283,30 +320,53 @@
                     if (!officeWorkersByDay[dayIndex].includes(user)) {
                         officeWorkersByDay[dayIndex].push(user);
                     }
+                } else {
+                    if (!absentWorkersByDay[dayIndex].includes(user)) {
+                        absentWorkersByDay[dayIndex].push(user);
+                    }
                 }
             });
 
+            // 1. עדכון מונים והובר בסיכום השבועי
             for (let i = 0; i < 5; i++) {
                 document.getElementById(`count-${i}`).textContent = weeklyOfficeCounts[i];
+                const dayCard = document.getElementById(`day-card-${i}`);
+                dayCard.title = absentWorkersByDay[i].length > 0 ? "לא יגיעו:\n" + absentWorkersByDay[i].join("\n") : "כולם מגיעים!";
             }
 
+            // 2. חישוב היום הנוכחי
             let currentDayIndex = new Date().getDay(); 
             if (currentDayIndex > 4 || currentDayIndex < 0) currentDayIndex = 0;
 
-            document.getElementById("today-title").textContent = `מי במשרד היום (יום ${daysNames[currentDayIndex]})?`;
+            document.getElementById("today-title").textContent = `מצב נוכחות היום (יום ${daysNames[currentDayIndex]})`;
 
-            const todayContainer = document.getElementById("today-office-workers");
-            todayContainer.innerHTML = "";
+            // 3. עדכון רשימת הנוכחים (במשרד)
+            const todayOfficeContainer = document.getElementById("today-office-workers");
+            todayOfficeContainer.innerHTML = "";
             const workersToday = officeWorkersByDay[currentDayIndex];
-
             if (workersToday.length === 0) {
-                todayContainer.innerHTML = "<span style='color:var(--text-muted); font-size:0.85rem;'>אף אחד לא במשרד היום...</span>";
+                todayOfficeContainer.innerHTML = "<span style='color:var(--text-muted); font-size:0.85rem;'>אין אף אחד במשרד</span>";
             } else {
                 workersToday.forEach(worker => {
                     const tag = document.createElement("span");
                     tag.className = "today-tag";
                     tag.textContent = worker;
-                    todayContainer.appendChild(tag);
+                    todayOfficeContainer.appendChild(tag);
+                });
+            }
+
+            // 4. עדכון רשימת הניעדרים (לא פה)
+            const todayAbsentContainer = document.getElementById("today-absent-workers");
+            todayAbsentContainer.innerHTML = "";
+            const absentToday = absentWorkersByDay[currentDayIndex];
+            if (absentToday.length === 0) {
+                todayAbsentContainer.innerHTML = "<span style='color:var(--text-muted); font-size:0.85rem;'>כולם פה!</span>";
+            } else {
+                absentToday.forEach(worker => {
+                    const tag = document.createElement("span");
+                    tag.className = "today-tag absent";
+                    tag.textContent = worker;
+                    todayAbsentContainer.appendChild(tag);
                 });
             }
         }
