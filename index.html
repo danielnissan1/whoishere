@@ -3,184 +3,130 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>מצב נוכחות צוות</title>
+    <title>נוכחות</title>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
-            --text-muted: #64748b;
             --border-color: #e2e8f0;
-            
-            /* מצבי כפתורים */
-            --office-bg: #f1f5f9;
-            --office-text: #475569;
-            --home-bg: #2563eb;
-            --home-text: #ffffff;
+            --off-state: #e2e8f0;
+            --on-state: #2563eb;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 25px 15px;
+            padding: 30px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
         h1 {
-            color: #1e293b;
-            margin-bottom: 4px;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 700;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            margin-bottom: 25px;
-            font-size: 0.95rem;
-            text-align: center;
+            margin-bottom: 24px;
         }
 
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 12px;
             width: 100%;
-            max-width: 1000px;
+            max-width: 900px;
         }
 
         .user-card {
             background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 14px;
             border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
         }
 
         .user-name {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
-            color: var(--text-main);
         }
 
-        .days-container {
+        .days-row {
             display: flex;
-            justify-content: space-between;
-            gap: 6px;
+            gap: 8px;
         }
 
-        .day-wrapper {
+        .day-box {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            min-width: 0; /* מונע קריסה של הכפתורים במובייל */
+            gap: 4px;
         }
 
-        .day-name {
+        .day-header {
             font-size: 0.75rem;
             font-weight: 600;
             color: #94a3b8;
-            white-space: nowrap;
         }
 
-        .day-label {
+        .clickable-label {
             cursor: pointer;
             width: 100%;
         }
 
-        .day-label input {
+        .clickable-label input {
             display: none;
         }
 
-        /* כפתור הסטטוס */
-        .status-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 2px;
-            background-color: var(--office-bg);
-            color: var(--office-text);
+        /* הריבוע הבינארי הנקי */
+        .binary-square {
+            height: 36px;
+            background-color: var(--off-state);
             border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.15s ease;
-            user-select: none;
-            white-space: nowrap;
+            transition: background-color 0.1s ease;
         }
 
-        /* ברירת מחדל - משרד */
-        .status-btn::before {
-            content: "משרד";
+        /* מצב מסומן */
+        .clickable-label input:checked + .binary-square {
+            background-color: var(--on-state);
         }
 
-        /* כשהצ'קבוקס מופעל - הופך לבית */
-        .day-label input:checked + .status-btn {
-            background-color: var(--home-bg);
-            color: var(--home-text);
-            font-weight: 600;
-        }
-
-        .day-label input:checked + .status-btn::before {
-            content: "בית";
-        }
-
-        /* כפתור שמירה צף */
+        /* כפתור שמירה קומפקטי */
         .save-container {
-            margin-top: 35px;
-            position: sticky;
-            bottom: 15px;
-            z-index: 10;
+            margin-top: 30px;
         }
 
         .save-btn {
-            background-color: #1e293b;
+            background-color: #0f172a;
             color: white;
             border: none;
-            padding: 14px 50px;
-            font-size: 15px;
+            padding: 12px 40px;
+            font-size: 14px;
             font-weight: 600;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-
-        .save-btn:hover {
-            background-color: #0f172a;
         }
 
         .save-btn:disabled {
             background-color: #94a3b8;
-            cursor: not-allowed;
         }
 
         /* טעינה */
         .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 50px;
+            margin: 40px;
         }
-
         .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--primary-color);
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--on-state);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -189,8 +135,7 @@
 </head>
 <body>
 
-    <h1>עדכון מיקום צוות</h1>
-    <div class="subtitle">קליק על היום כדי לשנות בין משרד לבית, ובסיום לחצו שמירה</div>
+    <h1>מצב נוכחות צוות</h1>
 
     <div id="loading" class="loading-container">
         <div class="spinner"></div>
@@ -206,7 +151,7 @@
 
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbx71dQBWIJyZ238V2TMIRYCAwjqFMQTCvl8iwIpr0--4w4pi8ibYrlTSadugkf7fKvC/exec";
-        const daysNames = ["ראשון", "שני", "שלישי", "רביעי", "חמישי"];
+        const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
 
         async function loadCards() {
             try {
@@ -224,20 +169,20 @@
                     nameDiv.textContent = user.name;
                     card.appendChild(nameDiv);
 
-                    const daysContainer = document.createElement("div");
-                    daysContainer.className = "days-container";
+                    const daysRow = document.createElement("div");
+                    daysRow.className = "days-row";
 
                     for (let i = 0; i < 5; i++) {
-                        const dayWrapper = document.createElement("div");
-                        dayWrapper.className = "day-wrapper";
+                        const dayBox = document.createElement("div");
+                        dayBox.className = "day-box";
 
-                        const dayName = document.createElement("div");
-                        dayName.className = "day-name";
-                        dayName.textContent = daysNames[i];
-                        dayWrapper.appendChild(dayName);
+                        const dayHeader = document.createElement("div");
+                        dayHeader.className = "day-header";
+                        dayHeader.textContent = daysNames[i];
+                        dayBox.appendChild(dayHeader);
 
                         const label = document.createElement("label");
-                        label.className = "day-label";
+                        label.className = "clickable-label";
 
                         const checkbox = document.createElement("input");
                         checkbox.type = "checkbox";
@@ -245,16 +190,16 @@
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
 
-                        const statusBtn = document.createElement("div");
-                        statusBtn.className = "status-btn";
+                        const square = document.createElement("div");
+                        square.className = "binary-square";
                         
                         label.appendChild(checkbox);
-                        label.appendChild(statusBtn);
-                        dayWrapper.appendChild(label);
-                        daysContainer.appendChild(dayWrapper);
+                        label.appendChild(square);
+                        dayBox.appendChild(label);
+                        daysRow.appendChild(dayBox);
                     }
 
-                    card.appendChild(daysContainer);
+                    card.appendChild(daysRow);
                     container.appendChild(card);
                 });
 
@@ -262,7 +207,7 @@
                 container.style.display = "grid";
                 document.getElementById("save-btn").style.display = "block";
             } catch (e) {
-                document.getElementById("loading").innerHTML = "<div style='color:#ef4444; font-weight:600;'>שגיאה בטעינת הנתונים</div>";
+                document.getElementById("loading").innerHTML = "שגיאה בטעינה";
                 console.error(e);
             }
         }
@@ -290,9 +235,9 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
-                alert("העדכון נשמר בהצלחה!");
+                alert("נשמר!");
             } catch (e) {
-                alert("שגיאה בשמירת הנתונים");
+                alert("שגיאה");
                 console.error(e);
             } finally {
                 btn.textContent = "שמור שינויים";
