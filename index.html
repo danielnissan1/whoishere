@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>נוכחות</title>
+    <title>דאשבורד נוכחות צוות</title>
     <style>
         :root {
-            --bg-color: #f8fafc;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
             --text-main: #0f172a;
-            --border-color: #e2e8f0;
-            --off-state: #e2e8f0;
-            --on-state: #2563eb;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            
+            /* מצבים בינאריים נקיים */
+            --office-state-bg: #ffffff;
+            --office-state-text: #0f172a;
+            --home-state-bg: #1e293b;
+            --home-state-text: #ffffff;
         }
 
         body {
@@ -19,7 +24,7 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 30px 15px;
+            padding: 25px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -28,102 +33,177 @@
         h1 {
             font-size: 1.6rem;
             font-weight: 700;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
+        /* אזור הסיכומים העליון */
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .summary-card h3 {
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            color: var(--text-main);
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 6px;
+        }
+
+        /* רשימת האנשים במשרד היום */
+        .today-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .today-tag {
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* סיכום שבועי מספרי */
+        .weekly-summary-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .weekly-summary-day {
+            flex: 1;
+            text-align: center;
+            background: #f8fafc;
+            padding: 8px 4px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .weekly-day-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .weekly-day-count {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        /* גריד הכרטיסיות הראשי */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 12px;
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
         }
 
         .user-card {
             background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 14px;
-            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
         }
 
         .user-name {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 600;
         }
 
         .days-row {
             display: flex;
-            gap: 8px;
-        }
-
-        .day-box {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .day-header {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #94a3b8;
+            gap: 6px;
         }
 
         .clickable-label {
+            flex: 1;
             cursor: pointer;
-            width: 100%;
         }
 
         .clickable-label input {
             display: none;
         }
 
-        /* הריבוע הבינארי הנקי */
+        /* קוביית המצב הבינארית החדשה */
         .binary-square {
-            height: 36px;
-            background-color: var(--off-state);
-            border-radius: 6px;
-            transition: background-color 0.1s ease;
+            height: 45px;
+            background-color: var(--office-state-bg);
+            color: var(--office-state-text);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            user-select: none;
         }
 
-        /* מצב מסומן */
+        .square-day {
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        /* מצב "בית" - כשהתיבה מסומנת, הופך לכהה ובולט */
         .clickable-label input:checked + .binary-square {
-            background-color: var(--on-state);
+            background-color: var(--home-state-bg);
+            color: var(--home-state-text);
+            border-color: var(--home-state-bg);
         }
 
-        /* כפתור שמירה קומפקטי */
+        /* כפתור שמירה קבוע צף בתחתית */
         .save-container {
             margin-top: 30px;
+            position: sticky;
+            bottom: 20px;
+            z-index: 10;
         }
 
         .save-btn {
             background-color: #0f172a;
             color: white;
             border: none;
-            padding: 12px 40px;
-            font-size: 14px;
+            padding: 14px 50px;
+            font-size: 15px;
             font-weight: 600;
-            border-radius: 6px;
+            border-radius: 30px;
             cursor: pointer;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
         }
 
         .save-btn:disabled {
             background-color: #94a3b8;
         }
 
-        /* טעינה */
         .loading-container {
-            margin: 40px;
+            margin: 50px;
         }
         .spinner {
-            width: 24px;
-            height: 24px;
-            border: 2px solid var(--border-color);
-            border-top: 2px solid var(--on-state);
+            width: 28px;
+            height: 28px;
+            border: 2px solid #cbd5e1;
+            border-top: 2px solid #0f172a;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -135,7 +215,26 @@
 </head>
 <body>
 
-    <h1>מצב נוכחות צוות</h1>
+    <h1>🌎 דאשבורד נוכחות צוות</h1>
+
+    <div class="summary-section" id="summary-area" style="display: none;">
+        <div class="summary-card">
+            <h3 id="today-title">מי במשרד היום?</h3>
+            <div class="today-list" id="today-office-workers">
+                </div>
+        </div>
+
+        <div class="summary-card">
+            <h3>כמה מגיעים למשרד השבוע?</h3>
+            <div class="weekly-summary-grid">
+                <div class="weekly-summary-day"><div class="weekly-day-title">א'</div><div class="weekly-day-count" id="count-0">0</div></div>
+                <div class="weekly-summary-day"><div class="weekly-day-title">ב'</div><div class="weekly-day-count" id="count-1">0</div></div>
+                <div class="weekly-summary-day"><div class="weekly-day-title">ג'</div><div class="weekly-day-count" id="count-2">0</div></div>
+                <div class="weekly-summary-day"><div class="weekly-day-title">ד'</div><div class="weekly-day-count" id="count-3">0</div></div>
+                <div class="weekly-summary-day"><div class="weekly-day-title">ה'</div><div class="weekly-day-count" id="count-4">0</div></div>
+            </div>
+        </div>
+    </div>
 
     <div id="loading" class="loading-container">
         <div class="spinner"></div>
@@ -152,15 +251,67 @@
     <script>
         const scriptUrl = "https://script.google.com/macros/s/AKfycbx71dQBWIJyZ238V2TMIRYCAwjqFMQTCvl8iwIpr0--4w4pi8ibYrlTSadugkf7fKvC/exec";
         const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
+        let globalData = [];
+
+        // פונקציה שמחשבת ומעדכנת את כל הסטטיסטיקות במסך בזמן אמת
+        function updateLiveSummaries() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            
+            // אתחול מונים לשבוע (כמה במשרד)
+            const weeklyOfficeCounts = [0, 0, 0, 0, 0];
+            // מפת אנשים שנמצאים במשרד בכל יום
+            const officeWorkersByDay = [[], [], [], [], []];
+
+            checkboxes.forEach(cb => {
+                const user = cb.dataset.user;
+                const dayIndex = parseInt(cb.dataset.day);
+                
+                if (!cb.checked) { 
+                    // אם הצ'קבוקס לא מסומן -> הבנאדם במשרד
+                    weeklyOfficeCounts[dayIndex]++;
+                    if (!officeWorkersByDay[dayIndex].includes(user)) {
+                        officeWorkersByDay[dayIndex].push(user);
+                    }
+                }
+            });
+
+            // 1. עדכון המונים של כל השבוע
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`count-${i}`).textContent = weeklyOfficeCounts[i];
+            }
+
+            // 2. חישוב היום הנוכחי (0 = ראשון, 4 = חמישי)
+            let currentDayIndex = new Date().getDay(); 
+            // אם אנחנו בשישי או שבת, נציג כברירת מחדל את יום ראשון
+            if (currentDayIndex > 4 || currentDayIndex < 0) currentDayIndex = 0;
+
+            document.getElementById("today-title").textContent = `מי במשרד היום (יום ${daysNames[currentDayIndex]})?`;
+
+            // 3. עדכון רשימת השמות של היום
+            const todayContainer = document.getElementById("today-office-workers");
+            todayContainer.innerHTML = "";
+            const workersToday = officeWorkersByDay[currentDayIndex];
+
+            if (workersToday.length === 0) {
+                todayContainer.innerHTML = "<span style='color:var(--text-muted); font-size:0.85rem;'>אף אחד לא במשרד היום...</span>";
+            } else {
+                workersToday.forEach(worker => {
+                    const tag = document.createElement("span");
+                    tag.className = "today-tag";
+                    tag.textContent = worker;
+                    todayContainer.appendChild(tag);
+                });
+            }
+        }
 
         async function loadCards() {
             try {
                 const response = await fetch(scriptUrl);
-                const data = await response.json();
+                globalData = await response.json();
                 const container = document.getElementById("cards-container");
                 container.innerHTML = "";
 
-                data.forEach((user) => {
+                globalData.forEach((user) => {
                     const card = document.createElement("div");
                     card.className = "user-card";
 
@@ -173,14 +324,6 @@
                     daysRow.className = "days-row";
 
                     for (let i = 0; i < 5; i++) {
-                        const dayBox = document.createElement("div");
-                        dayBox.className = "day-box";
-
-                        const dayHeader = document.createElement("div");
-                        dayHeader.className = "day-header";
-                        dayHeader.textContent = daysNames[i];
-                        dayBox.appendChild(dayHeader);
-
                         const label = document.createElement("label");
                         label.className = "clickable-label";
 
@@ -190,13 +333,20 @@
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
 
+                        // האזנה לשינויים כדי לעדכן את הסטטיסטיקה בלייב
+                        checkbox.addEventListener('change', updateLiveSummaries);
+
                         const square = document.createElement("div");
                         square.className = "binary-square";
                         
+                        const daySpan = document.createElement("span");
+                        daySpan.className = "square-day";
+                        daySpan.textContent = daysNames[i];
+                        
+                        square.appendChild(daySpan);
                         label.appendChild(checkbox);
                         label.appendChild(square);
-                        dayBox.appendChild(label);
-                        daysRow.appendChild(dayBox);
+                        daysRow.appendChild(label);
                     }
 
                     card.appendChild(daysRow);
@@ -204,10 +354,15 @@
                 });
 
                 document.getElementById("loading").style.display = "none";
+                document.getElementById("summary-area").style.display = "grid";
                 container.style.display = "grid";
                 document.getElementById("save-btn").style.display = "block";
+                
+                // הרצה ראשונית של הסיכומים עם טעינת הדף
+                updateLiveSummaries();
+
             } catch (e) {
-                document.getElementById("loading").innerHTML = "שגיאה בטעינה";
+                document.getElementById("loading").innerHTML = "שגיאה בטעינת הנתונים";
                 console.error(e);
             }
         }
