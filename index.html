@@ -102,7 +102,7 @@
         .weekly-summary-grid {
             display: flex;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
             height: 100%;
             align-items: center;
         }
@@ -112,7 +112,7 @@
             flex: 1;
             text-align: center;
             background: #f8fafc;
-            padding: 8px 4px;
+            padding: 6px 2px;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
             position: relative;
@@ -162,16 +162,26 @@
         }
 
         .weekly-day-title {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            font-weight: 700;
             margin-bottom: 4px;
         }
 
-        .weekly-day-count {
-            font-size: 1.1rem;
-            font-weight: 700;
+        .weekly-day-counts-box {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            line-height: 1.3;
+        }
+
+        .count-highlight-office {
             color: #2563eb;
+            font-weight: 700;
+        }
+
+        .count-highlight-absent {
+            color: #475569;
+            font-weight: 700;
         }
 
         /* גריד הכרטיסיות */
@@ -213,9 +223,9 @@
             display: none;
         }
 
-        /* קוביית המצב הבינארית */
+        /* קוביית המצב הבינארית המשודרגת */
         .binary-square {
-            height: 52px;
+            height: 56px;
             background-color: var(--office-bg);
             color: var(--office-text);
             border: 2px solid var(--border-color);
@@ -231,14 +241,22 @@
         .square-day {
             font-size: 0.95rem;
             font-weight: 700;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
         .square-status-text {
             font-size: 0.65rem;
             font-weight: 500;
-            margin-top: 2px;
+            margin-top: 1px;
             opacity: 0.7;
+        }
+
+        /* מונה הזמינות הקטן בתוך הקובייה */
+        .square-capacity-text {
+            font-size: 0.55rem;
+            font-weight: 600;
+            margin-top: 1px;
+            opacity: 0.6;
         }
 
         .square-status-text::before {
@@ -255,28 +273,43 @@
             content: "לא פה";
         }
 
-        /* כפתור שמירה צף */
-        .save-container {
+        /* כפתורי פעולה תחתונים */
+        .action-container {
             margin-top: 30px;
             position: sticky;
             bottom: 20px;
             z-index: 10;
+            display: flex;
+            gap: 10px;
         }
 
-        .save-btn {
-            background-color: #0f172a;
-            color: white;
+        .action-btn {
             border: none;
-            padding: 14px 50px;
+            padding: 14px 40px;
             font-size: 15px;
             font-weight: 600;
             border-radius: 30px;
             cursor: pointer;
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            transition: transform 0.1s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .save-btn {
+            background-color: #0f172a;
+            color: white;
         }
 
         .save-btn:disabled {
             background-color: #94a3b8;
+        }
+
+        .reset-btn {
+            background-color: #ef4444;
+            color: white;
         }
 
         .loading-container {
@@ -316,31 +349,31 @@
         </div>
 
         <div class="summary-card">
-            <h3>כמה מגיעים למשרד השבוע?</h3>
+            <h3>סטטיסטיקה שבועית</h3>
             <div class="weekly-summary-grid">
                 <div class="weekly-summary-day" id="day-card-0">
                     <div class="weekly-day-title">א'</div>
-                    <div class="weekly-day-count" id="count-0">0</div>
+                    <div class="weekly-day-counts-box" id="count-box-0">טוען...</div>
                     <span class="tooltip-text" id="tooltip-0">כולם מגיעים!</span>
                 </div>
                 <div class="weekly-summary-day" id="day-card-1">
                     <div class="weekly-day-title">ב'</div>
-                    <div class="weekly-day-count" id="count-1">0</div>
+                    <div class="weekly-day-counts-box" id="count-box-1">טוען...</div>
                     <span class="tooltip-text" id="tooltip-1">כולם מגיעים!</span>
                 </div>
                 <div class="weekly-summary-day" id="day-card-2">
                     <div class="weekly-day-title">ג'</div>
-                    <div class="weekly-day-count" id="count-2">0</div>
+                    <div class="weekly-day-counts-box" id="count-box-2">טוען...</div>
                     <span class="tooltip-text" id="tooltip-2">כולם מגיעים!</span>
                 </div>
                 <div class="weekly-summary-day" id="day-card-3">
                     <div class="weekly-day-title">ד'</div>
-                    <div class="weekly-day-count" id="count-3">0</div>
+                    <div class="weekly-day-counts-box" id="count-box-3">טוען...</div>
                     <span class="tooltip-text" id="tooltip-3">כולם מגיעים!</span>
                 </div>
                 <div class="weekly-summary-day" id="day-card-4">
                     <div class="weekly-day-title">ה'</div>
-                    <div class="weekly-day-count" id="count-4">0</div>
+                    <div class="weekly-day-counts-box" id="count-box-4">טוען...</div>
                     <span class="tooltip-text" id="tooltip-4">כולם מגיעים!</span>
                 </div>
             </div>
@@ -353,8 +386,11 @@
 
     <div class="grid-container" id="cards-container" style="display: none"></div>
 
-    <div class="save-container">
-        <button class="save-btn" id="save-btn" style="display: none" onclick="saveData()">
+    <div class="action-container">
+        <button class="action-btn reset-btn" id="reset-btn" style="display: none" onclick="resetAllCheckboxes()">
+            איפוס שבועי
+        </button>
+        <button class="action-btn save-btn" id="save-btn" style="display: none" onclick="saveData()">
             שמור שינויים
         </button>
     </div>
@@ -364,46 +400,38 @@
         const daysNames = ["א'", "ב'", "ג'", "ד'", "ה'"];
         let globalData = [];
 
-        // פונקציית הליבה שמחשבת את המצב ומאכפת את החוקים החדשים
         function handleCheckboxChange(e) {
             const cb = e.target;
             const targetUser = cb.dataset.user;
             const targetDay = parseInt(cb.dataset.day);
 
-            // אם המשתמש מנסה לסמן "לא פה" (כלומר checked = true)
             if (cb.checked) {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-                
                 let userAbsentCount = 0;
                 let dayAbsentCount = 0;
 
                 checkboxes.forEach(otherCb => {
-                    // סופרים כמה ימים המשתמש הנוכחי כבר סימן כ"לא פה" (לא כולל הלחיצה הנוכחית)
                     if (otherCb !== cb && otherCb.dataset.user === targetUser && otherCb.checked) {
                         userAbsentCount++;
                     }
-                    // סופרים כמה אנשים כבר לא פה ביום הספציפי הזה
                     if (otherCb !== cb && parseInt(otherCb.dataset.day) === targetDay && otherCb.checked) {
                         dayAbsentCount++;
                     }
                 });
 
-                // חוק 1: מקסימום יומיים בשבוע לעובד
                 if (userAbsentCount >= 2) {
                     alert(`לא ניתן לסמן: ${targetUser} כבר ניצל את מקסימום יומיים "לא פה" לשבוע זה.`);
                     cb.checked = false;
                     return;
                 }
 
-                // חוק 2: מקסימום 5 אנשים ביום מהבית (כלומר מקסימום 5 מסומנים כ"לא פה")
                 if (dayAbsentCount >= 5) {
-                    alert(`לא ניתן לסמן: ביום ${daysNames[targetDay]} כבר רשומים 5 אנשים כ"לא פה" (הגעתם למכסה הנהלתית).`);
+                    alert(`לא ניתן לסמן: ביום ${daysNames[targetDay]} כבר רשומים 5 אנשים כ"לא פה".`);
                     cb.checked = false;
                     return;
                 }
             }
 
-            // אם הכל תקין, מעדכנים את הדאשבורד בלייב
             updateLiveSummaries();
         }
 
@@ -429,25 +457,38 @@
                 }
             });
 
-            // 1. עדכון מונים וטולטיפים
+            // 1. עדכון מונים בסיכום השבועי (משרד מול בית) וטולטיפים
             for (let i = 0; i < 5; i++) {
-                document.getElementById(`count-${i}`).textContent = weeklyOfficeCounts[i];
-                const tooltipEl = document.getElementById(`tooltip-${i}`);
+                const totalOffice = weeklyOfficeCounts[i];
+                const totalAbsent = absentWorkersByDay[i].length;
                 
-                if (absentWorkersByDay[i].length > 0) {
+                document.getElementById(`count-box-i` ? `count-box-${i}` : '').innerHTML = `
+                    <span class="count-highlight-office">משרד: ${totalOffice}</span><br>
+                    <span class="count-highlight-absent">בית: ${totalAbsent}</span>
+                `;
+
+                const tooltipEl = document.getElementById(`tooltip-${i}`);
+                if (totalAbsent > 0) {
                     tooltipEl.innerHTML = "<strong>לא יגיעו:</strong>\n" + absentWorkersByDay[i].join("\n");
                 } else {
                     tooltipEl.textContent = "כולם מגיעים!";
                 }
+
+                // 2. עדכון מד הזמינות החי על גבי כל הקוביות של אותו היום
+                const dayCapacities = 5 - totalAbsent;
+                const capacityEls = document.querySelectorAll(`.capacity-day-${i}`);
+                capacityEls.forEach(el => {
+                    el.textContent = `(נשארו ${dayCapacities})`;
+                });
             }
 
-            // 2. חישוב היום הנוכחי
+            // 3. חישוב היום הנוכחי
             let currentDayIndex = new Date().getDay(); 
             if (currentDayIndex > 4 || currentDayIndex < 0) currentDayIndex = 0;
 
             document.getElementById("today-title").textContent = `מצב נוכחות היום (יום ${daysNames[currentDayIndex]})`;
 
-            // 3. עדכון רשימת הנוכחים במשרד
+            // 4. עדכון רשימת הנוכחים במשרד היום
             const todayOfficeContainer = document.getElementById("today-office-workers");
             todayOfficeContainer.innerHTML = "";
             const workersToday = officeWorkersByDay[currentDayIndex];
@@ -462,7 +503,7 @@
                 });
             }
 
-            // 4. עדכון רשימת הלא פה
+            // 5. עדכון רשימת הלא פה היום
             const todayAbsentContainer = document.getElementById("today-absent-workers");
             todayAbsentContainer.innerHTML = "";
             const absentToday = absentWorkersByDay[currentDayIndex];
@@ -475,6 +516,15 @@
                     tag.textContent = worker;
                     todayAbsentContainer.appendChild(tag);
                 });
+            }
+        }
+
+        // פונקציית איפוס מקומית נוחה לניקוי מהיר של כל הטבלה
+        function resetAllCheckboxes() {
+            if (confirm("האם אתה בטוח שברצונך לאפס את כל הבחירות של כל העובדים לשבוע זה? (אל תשכח לשמור בסוף)")) {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = false);
+                updateLiveSummaries();
             }
         }
 
@@ -507,7 +557,6 @@
                         checkbox.dataset.day = i;
                         checkbox.checked = user.days[i] === true || user.days[i] === "TRUE";
 
-                        // העברנו את הלוגיקה לפונקציה החדשה שמבצעת את הוולידציות
                         checkbox.addEventListener('change', handleCheckboxChange);
 
                         const square = document.createElement("div");
@@ -520,8 +569,14 @@
                         const statusSpan = document.createElement("span");
                         statusSpan.className = "square-status-text";
                         
+                        // אלמנט המציג כמה מקומות פנויים נותרו ליום הזה
+                        const capacitySpan = document.createElement("span");
+                        capacitySpan.className = `square-capacity-text capacity-day-${i}`;
+                        capacitySpan.textContent = "(נשארו 5)";
+                        
                         square.appendChild(daySpan);
                         square.appendChild(statusSpan);
+                        square.appendChild(capacitySpan);
                         label.appendChild(checkbox);
                         label.appendChild(square);
                         daysRow.appendChild(label);
@@ -535,6 +590,7 @@
                 document.getElementById("summary-area").style.display = "grid";
                 container.style.display = "grid";
                 document.getElementById("save-btn").style.display = "block";
+                document.getElementById("reset-btn").style.display = "block";
                 
                 updateLiveSummaries();
 
