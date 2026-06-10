@@ -223,7 +223,7 @@
             display: none;
         }
 
-        /* קוביית המצב הבינארית המשודרגת */
+        /* קוביית המצב הבינארית */
         .binary-square {
             height: 56px;
             background-color: var(--office-bg);
@@ -251,7 +251,6 @@
             opacity: 0.7;
         }
 
-        /* מונה הזמינות הקטן בתוך הקובייה */
         .square-capacity-text {
             font-size: 0.55rem;
             font-weight: 600;
@@ -457,12 +456,11 @@
                 }
             });
 
-            // 1. עדכון מונים בסיכום השבועי (משרד מול בית) וטולטיפים
             for (let i = 0; i < 5; i++) {
                 const totalOffice = weeklyOfficeCounts[i];
                 const totalAbsent = absentWorkersByDay[i].length;
                 
-                document.getElementById(`count-box-i` ? `count-box-${i}` : '').innerHTML = `
+                document.getElementById(`count-box-${i}`).innerHTML = `
                     <span class="count-highlight-office">משרד: ${totalOffice}</span><br>
                     <span class="count-highlight-absent">בית: ${totalAbsent}</span>
                 `;
@@ -474,7 +472,6 @@
                     tooltipEl.textContent = "כולם מגיעים!";
                 }
 
-                // 2. עדכון מד הזמינות החי על גבי כל הקוביות של אותו היום
                 const dayCapacities = 5 - totalAbsent;
                 const capacityEls = document.querySelectorAll(`.capacity-day-${i}`);
                 capacityEls.forEach(el => {
@@ -482,13 +479,11 @@
                 });
             }
 
-            // 3. חישוב היום הנוכחי
             let currentDayIndex = new Date().getDay(); 
             if (currentDayIndex > 4 || currentDayIndex < 0) currentDayIndex = 0;
 
             document.getElementById("today-title").textContent = `מצב נוכחות היום (יום ${daysNames[currentDayIndex]})`;
 
-            // 4. עדכון רשימת הנוכחים במשרד היום
             const todayOfficeContainer = document.getElementById("today-office-workers");
             todayOfficeContainer.innerHTML = "";
             const workersToday = officeWorkersByDay[currentDayIndex];
@@ -503,7 +498,6 @@
                 });
             }
 
-            // 5. עדכון רשימת הלא פה היום
             const todayAbsentContainer = document.getElementById("today-absent-workers");
             todayAbsentContainer.innerHTML = "";
             const absentToday = absentWorkersByDay[currentDayIndex];
@@ -519,12 +513,17 @@
             }
         }
 
-        // פונקציית איפוס מקומית נוחה לניקוי מהיר של כל הטבלה
+        // פונקציית איפוס שמנקה את הכל וקוראת מיידית לשמירה בשרת
         function resetAllCheckboxes() {
-            if (confirm("האם אתה בטוח שברצונך לאפס את כל הבחירות של כל העובדים לשבוע זה? (אל תשכח לשמור בסוף)")) {
+            if (confirm("האם אתה בטוח שברצונך לאפס את כל הבחירות של כל העובדים לשבוע זה? המערכת תאפס ותשמור אוטומטית.")) {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => cb.checked = false);
+                
+                // עדכון התצוגה המקומית קודם כל
                 updateLiveSummaries();
+                
+                // שליחה מיידית ואוטומטית לענן
+                saveData();
             }
         }
 
@@ -569,7 +568,6 @@
                         const statusSpan = document.createElement("span");
                         statusSpan.className = "square-status-text";
                         
-                        // אלמנט המציג כמה מקומות פנויים נותרו ליום הזה
                         const capacitySpan = document.createElement("span");
                         capacitySpan.className = `square-capacity-text capacity-day-${i}`;
                         capacitySpan.textContent = "(נשארו 5)";
@@ -601,9 +599,12 @@
         }
 
         async function saveData() {
-            const btn = document.getElementById("save-btn");
-            btn.textContent = "שומר...";
-            btn.disabled = true;
+            const saveBtn = document.getElementById("save-btn");
+            const resetBtn = document.getElementById("reset-btn");
+            
+            saveBtn.textContent = "שומר...";
+            saveBtn.disabled = true;
+            resetBtn.disabled = true;
 
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             const payload = {};
@@ -623,13 +624,14 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 });
-                alert("נשמר בהצלחה!");
+                alert("הנתונים נשמרו בהצלחה בענן!");
             } catch (e) {
                 alert("שגיאה בשמירת הנתונים");
                 console.error(e);
             } finally {
-                btn.textContent = "שמור שינויים";
-                btn.disabled = false;
+                saveBtn.textContent = "שמור שינויים";
+                saveBtn.disabled = false;
+                resetBtn.disabled = false;
             }
         }
 
