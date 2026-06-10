@@ -1,3 +1,10 @@
+צודק ב-100%, מבחינת חוויית משתמש (UX) כפתור הרסני או משני כמו איפוס תמיד עדיף שיהיה בצד שמאל (רחוק מהאגודל או מנתיב הלחיצה הראשי), וכיתוב קצר יותר שומר על פוקוס.
+
+שיניתי את הסדר של הכפתורים בתוך ה-DOM (כך שהאיפוס תפס את הצד הימני הויזואלי/שמאלי מבחינת תזרים ה-RTL) וקיצרתי את הטקסט ל-**"איפוס"** בלבד.
+
+הנה הקוד המלא והמעודכן:
+
+```html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -279,12 +286,15 @@
             bottom: 20px;
             z-index: 10;
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            justify-content: center;
+            width: 100%;
+            max-width: 950px;
         }
 
         .action-btn {
             border: none;
-            padding: 14px 40px;
+            padding: 14px 45px;
             font-size: 15px;
             font-weight: 600;
             border-radius: 30px;
@@ -300,15 +310,20 @@
         .save-btn {
             background-color: #0f172a;
             color: white;
+            flex-grow: 2; /* נותן לכפתור השמירה נוכחות גדולה ומרכזית יותר */
+            max-width: 300px;
         }
 
         .save-btn:disabled {
             background-color: #94a3b8;
         }
 
+        /* כפתור איפוס קומפקטי בצד שמאל */
         .reset-btn {
             background-color: #ef4444;
             color: white;
+            padding: 14px 25px; /* קטן וקומפקטי יותר */
+            font-size: 14px;
         }
 
         .loading-container {
@@ -386,11 +401,11 @@
     <div class="grid-container" id="cards-container" style="display: none"></div>
 
     <div class="action-container">
-        <button class="action-btn reset-btn" id="reset-btn" style="display: none" onclick="resetAllCheckboxes()">
-            איפוס שבועי
-        </button>
         <button class="action-btn save-btn" id="save-btn" style="display: none" onclick="saveData()">
             שמור שינויים
+        </button>
+        <button class="action-btn reset-btn" id="reset-btn" style="display: none" onclick="resetAllCheckboxes()">
+            איפוס
         </button>
     </div>
 
@@ -513,16 +528,12 @@
             }
         }
 
-        // פונקציית איפוס שמנקה את הכל וקוראת מיידית לשמירה בשרת
         function resetAllCheckboxes() {
             if (confirm("האם אתה בטוח שברצונך לאפס את כל הבחירות של כל העובדים לשבוע זה? המערכת תאפס ותשמור אוטומטית.")) {
                 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => cb.checked = false);
                 
-                // עדכון התצוגה המקומית קודם כל
                 updateLiveSummaries();
-                
-                // שליחה מיידית ואוטומטית לענן
                 saveData();
             }
         }
@@ -639,3 +650,5 @@
     </script>
 </body>
 </html>
+
+```
